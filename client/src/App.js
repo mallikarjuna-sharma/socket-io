@@ -3,19 +3,10 @@ import { io } from "socket.io-client";
 
 import { useEffect } from "react";
 
-const BOT_MSGS = [
-  "Hi, how are you?",
-  "Ohh... I can't understand what you trying to say. Sorry!",
-  "I like to play games... But I don't know how to play!",
-  "Sorry if my answers are not relevant. :))",
-  "I feel sleepy! :(",
-];
-
-// Icons made by Freepik from www.flaticon.com
 const BOT_IMG = "https://image.flaticon.com/icons/svg/327/327779.svg";
 const PERSON_IMG = "https://image.flaticon.com/icons/svg/145/145867.svg";
-const BOT_NAME = "BOT";
-const PERSON_NAME = "Sajad";
+const BOT_NAME = "Response";
+const PERSON_NAME = "User";
 
 let isMounted = false;
 let msgerChat;
@@ -27,32 +18,33 @@ let roomId = "";
 let userSocket;
 
 function App() {
-
-
   useEffect(() => {
     if (isMounted) return;
 
-
     msgerChat = get(".msger-chat");
-    socket = io("http://localhost:3002/");
-
+    socket = io("http://localhost:3002/"); // initial
 
     userSocket = io("http://localhost:3002/user", {
-      auth: { token: 'my-token' },
+      // final
+      auth: { token: "my-token" },
     });
 
     document.addEventListener("keydown", (e) => {
+      // final
       if (e.target.matches("input")) return;
-  
+
       if (e.key === "c") socket.connect();
       if (e.key === "d") socket.disconnect();
     });
+
+    // final
     let count = 0;
     setInterval(() => {
-      console.log('here');
+      console.log("here");
       socket.volatile.emit("ping", ++count);
     }, 2000);
 
+    // initial
     socket.on("connect", () => {
       appendMessage(
         PERSON_NAME,
@@ -63,10 +55,12 @@ function App() {
       // socket.emit("custom-event", 100, 900);
     });
 
+    // initial
     socket.on("receive-message", (message) => {
       appendMessage(BOT_NAME, BOT_IMG, "left", message);
     });
 
+    // final
     userSocket.on("connect_error", (error) => {
       console.log(error, "userSocket message");
       appendMessage(BOT_NAME, BOT_IMG, "left", error);
@@ -76,42 +70,16 @@ function App() {
     isMounted = true;
   }, []);
 
-  // msgerFormJoin.addEventListener("submit", (event) => {
-  //   event.preventDefault();
-
-  //   const msgJoin = msgerJoin.value;
-  //   console.log(msgJoin, "msgJoin");
-
-  //   if (!msgJoin) return;
-
-  //   appendMessage(PERSON_NAME, PERSON_IMG, "right", msgJoin);
-  //   msgerInput.value = "";
-
-  //   botResponse();
-  // });
-
-  // msgerForm.addEventListener("submit", (event) => {
-  //   event.preventDefault();
-
-  //   const msgText = msgerInput.value;
-  //   console.log(msgText, "msgText");
-
-  //   if (!msgText) return;
-
-  //   appendMessage(PERSON_NAME, PERSON_IMG, "right", msgText);
-  //   msgerInput.value = "";
-
-  //   botResponse();
-  // });
-
   const onSendClick = (event) => {
     event.preventDefault();
 
+    // initial
     const msgText = document.getElementsByClassName("msger-input")[0].value;
     console.log(msgText, "msgText");
 
     if (!msgText) return;
 
+    // initial
     // socket.emit("send-message", msgText);
     socket.emit("send-message", msgText, roomId);
 
@@ -123,19 +91,21 @@ function App() {
 
   const onJoinClick = (event) => {
     event.preventDefault();
-
+    // initial
     const msgJoin = document.getElementsByClassName("msger-join")[0].value;
 
     console.log(msgJoin, "msgJoin");
 
     if (!msgJoin) return;
 
+    // middle
+
     roomId = msgJoin;
 
     // appendMessage(PERSON_NAME, PERSON_IMG, "right", msgJoin);
     document.getElementsByClassName("msger-input")[0].value = "";
 
-    // next steps
+    // middle
 
     socket.emit("join-room", roomId, (msg) => {
       appendMessage(PERSON_NAME, PERSON_IMG, "right", msg);
@@ -165,17 +135,6 @@ function App() {
     msgerChat.scrollTop += 500;
   }
 
-  function botResponse() {
-    const r = random(0, BOT_MSGS.length - 1);
-    const msgText = BOT_MSGS[r];
-    const delay = msgText.split(" ").length * 100;
-
-    setTimeout(() => {
-      appendMessage(BOT_NAME, BOT_IMG, "left", msgText);
-    }, delay);
-  }
-
-  // Utils
   function get(selector, root = document) {
     return root.querySelector(selector);
   }
@@ -185,10 +144,6 @@ function App() {
     const m = "0" + date.getMinutes();
 
     return `${h.slice(-2)}:${m.slice(-2)}`;
-  }
-
-  function random(min, max) {
-    return Math.floor(Math.random() * (max - min) + min);
   }
 
   return (
